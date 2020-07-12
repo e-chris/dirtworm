@@ -1,7 +1,4 @@
 #!/usr/bin/env python
-# Author: Mario Rivas Vivar
-# https://twitter.com/Grifo
-
 """
 Scan a list of hosts with a list of CGIs trying to exploit
  the ShellShock vulnerability with different methods and payloads (CVE-2014-6271, CVE-2014-6278)
