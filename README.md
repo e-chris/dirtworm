@@ -11,14 +11,14 @@
 ### Optional arguments:
 `vulnerable_path`: full path to page vulnerable to shellshock
 
-`v`: verbose
+`-v`: verbose
 
 ### Example:
-`./worm.py [vulnerable_path] [v]`
+`./worm.py [vulnerable_path] [-v]`
 
 `./worm.py http://192.168.56.111/cgi-bin/shock.sh`
 
-`./worm.py http://192.168.56.111/cgi-bin/shock.sh v`
+`./worm.py http://192.168.56.111/cgi-bin/shock.sh -v`
 
 ## Details
 ### Arguments
@@ -26,7 +26,7 @@ Running `worm.py` without any arguments will prompt the worm to establish itself
 
 Running `worm.py` with a `vulnerable_path` sends the worm to the remote host where it will try to exploit Shellshock and propagate.
 
-The `v` option outputs messages to standard out. Otherwise, the worm is completely silent.
+The `-v` option outputs messages to standard out. Otherwise the worm is completely silent. Additionally, `-v` causes the worm to skip executing its payload on the current host and go directly to vulnerability scanning/propagation.
 ### Adding Custom Payload
 The worm supports a variety of python payloads. The source code of the payload should be encoded in base 64: `base64 payload.py`
 
